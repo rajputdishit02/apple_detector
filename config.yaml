@@ -1,0 +1,146 @@
+# Apple Detection Project - Tuned Parameters Configuration
+# Optimized parameters for Mask-RCNN and Faster-RCNN training and inference
+
+# ============================================================================
+# TRAINING CONFIGURATION
+# ============================================================================
+training:
+  # Model selection
+  model_type: "maskrcnn"  # Options: "maskrcnn", "frcnn" (Faster-RCNN)
+  pretrained: true        # Use pre-trained COCO weights
+  
+  # Data paths
+  data_path: "./detection"
+  output_dir: "./checkpoints"
+  
+  # Epochs and schedule
+  epochs: 100             # Increased for better convergence with limited data
+  lr_steps: [30, 60, 80]  # Learning rate decay at these epochs
+  lr_gamma: 0.1           # Learning rate decay factor
+  
+  # Batch and sampling
+  batch_size: 2           # Keep small due to limited data
+  workers: 4              # Data loading workers
+  
+  # Optimization
+  optimizer: "sgd"        # Options: "sgd", "adam"
+  learning_rate: 0.005    # Reduced from 0.02 for better convergence
+  momentum: 0.9
+  weight_decay: 0.0001    # L2 regularization
+  
+  # Training specifics
+  print_freq: 10          # Print loss every N iterations
+  save_freq: 5            # Save checkpoint every N epochs
+  early_stopping_patience: 15  # Stop if no improvement for N epochs
+  gradient_clip_norm: 1.0      # Clip gradients to prevent explosion
+
+# ============================================================================
+# DATA AUGMENTATION
+# ============================================================================
+augmentation:
+  horizontal_flip_prob: 0.5
+  random_rotation: true
+  rotation_degrees: 15
+  color_jitter: true
+  brightness: 0.2
+  contrast: 0.2
+  saturation: 0.2
+  hue: 0.1
+  normalize:
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+
+# ============================================================================
+# MODEL ARCHITECTURE PARAMETERS
+# ============================================================================
+model:
+  backbone: "resnet50"      # Backbone architecture
+  fpn_enabled: true         # Feature Pyramid Network
+  num_classes: 2            # Background + Apple
+  
+  # ROI Head parameters
+  roi_batch_size_per_image: 512
+  pos_fraction: 0.25        # Fraction of positive samples in RPN
+  score_thresh: 0.05        # Threshold for NMS
+  nms_thresh: 0.5           # Non-Maximum Suppression threshold
+  detections_per_image: 100 # Max detections per image
+  
+  # RPN (Region Proposal Network) parameters
+  rpn_fg_iou_thresh: 0.7
+  rpn_bg_iou_thresh: 0.3
+  rpn_num_samples: 256
+  rpn_positive_fraction: 0.5
+  rpn_pre_nms_top_n:
+    train: 2000
+    test: 1000
+  rpn_post_nms_top_n:
+    train: 2000
+    test: 1000
+
+# ============================================================================
+# INFERENCE/PREDICTION CONFIGURATION
+# ============================================================================
+inference:
+  confidence_threshold: 0.5      # Minimum confidence for detection
+  nms_threshold: 0.5            # NMS threshold for overlapping boxes
+  max_detections_per_image: 100
+  device: "cuda"                # Options: "cuda", "cpu"
+  batch_size: 1                 # Inference batch size
+  
+  # Mask parameters (for Mask-RCNN)
+  mask_threshold: 0.5           # Threshold for mask binarization
+  mask_area_min: 10             # Minimum area for valid mask
+
+# ============================================================================
+# REGULARIZATION & PREVENTION OF OVERFITTING
+# ============================================================================
+regularization:
+  dropout_rate: 0.5
+  l2_regularization: 0.0001
+  use_mixup: false              # Data augmentation technique
+  mixup_alpha: 0.2
+  label_smoothing: 0.0          # Label smoothing factor
+  stochastic_depth: false       # Randomly drop layers during training
+
+# ============================================================================
+# VALIDATION & EVALUATION
+# ============================================================================
+evaluation:
+  val_freq: 5                   # Validate every N epochs
+  metrics:
+    - "mAP"                     # Mean Average Precision
+    - "precision"
+    - "recall"
+    - "f1_score"
+  iou_thresholds: [0.5, 0.75]  # IoU thresholds for evaluation
+  use_coco_metrics: true        # Use COCO evaluation protocol
+
+# ============================================================================
+# SYSTEM CONFIGURATION
+# ============================================================================
+system:
+  device: "cpu"                 # Options: "cuda", "cpu" (using CPU - PyTorch not compiled with CUDA)
+  num_workers: 2                # Reduced for CPU training
+  pin_memory: false             # False for CPU training
+  mixed_precision: false        # Use automatic mixed precision (AMP)
+  seed: 42                      # Random seed for reproducibility
+  cuda_benchmark: false         # False for CPU training
+
+# ============================================================================
+# DATA SUBSET SETTINGS (for testing/debugging)
+# ============================================================================
+data_subset:
+  use_subset: false             # Set to true to use subset for quick testing
+  train_subset_size: 20         # Number of training samples
+  test_subset_size: 10          # Number of test samples
+
+# ============================================================================
+# DATASET SPECIFIC PARAMETERS
+# ============================================================================
+dataset:
+  dataset_type: "detection"     # Options: "detection", "segmentation"
+  image_format: "jpg"           # Image file format
+  mask_format: "png"            # Mask file format
+  image_min_size: 512
+  image_max_size: 1024
+  aspect_ratio_group_factor: 3  # Group images by aspect ratio

@@ -2,6 +2,7 @@
 """
 Simplified training wrapper for apple detection on local dataset.
 Uses Mask-RCNN by default on the detection/train folder.
+Configuration is loaded from config.py with tuned parameters.
 """
 import os
 import sys
@@ -11,6 +12,7 @@ import argparse
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'MinneApple'))
 
 from MinneApple.train_rcnn import main
+from config import TRAINING, SYSTEM
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -40,45 +42,45 @@ def parse_args():
     parser.add_argument(
         '--epochs',
         type=int,
-        default=50,
+        default=TRAINING['epochs'],
         help='Number of training epochs'
     )
     parser.add_argument(
         '--batch-size',
         '-b',
         type=int,
-        default=2,
+        default=TRAINING['batch_size'],
         help='Batch size for training'
     )
     parser.add_argument(
         '--learning-rate',
         type=float,
-        default=0.02,
+        default=TRAINING['learning_rate'],
         help='Initial learning rate'
     )
     parser.add_argument(
         '--momentum',
         type=float,
-        default=0.9,
+        default=TRAINING['momentum'],
         help='SGD momentum'
     )
     parser.add_argument(
         '--weight-decay',
         type=float,
-        default=1e-4,
+        default=TRAINING['weight_decay'],
         help='Weight decay for L2 regularization'
     )
     parser.add_argument(
         '--lr-steps',
         nargs='+',
         type=int,
-        default=[8, 11],
+        default=TRAINING['lr_steps'],
         help='Epochs at which to decay learning rate'
     )
     parser.add_argument(
         '--lr-gamma',
         type=float,
-        default=0.1,
+        default=TRAINING['lr_gamma'],
         help='Learning rate decay factor'
     )
     
@@ -93,13 +95,13 @@ def parse_args():
         '--workers',
         '-j',
         type=int,
-        default=4,
+        default=SYSTEM['num_workers'],
         help='Number of data loading workers'
     )
     parser.add_argument(
         '--print-freq',
         type=int,
-        default=20,
+        default=TRAINING['print_freq'],
         help='Print frequency (iterations)'
     )
     parser.add_argument(

@@ -2,6 +2,7 @@
 """
 Simplified prediction wrapper for apple detection on local dataset.
 Uses local test images and generates predictions.
+Configuration is loaded from config.py with tuned parameters.
 """
 import os
 import sys
@@ -11,6 +12,7 @@ import argparse
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'MinneApple'))
 
 from MinneApple.predict_rcnn import main
+from config import INFERENCE, SYSTEM
 
 def parse_args():
     parser = argparse.ArgumentParser(
